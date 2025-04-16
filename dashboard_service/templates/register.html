@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro</title>
+  <style>
+    body { font-family: Arial; background: #f5f5f5; padding: 40px; }
+    .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }
+    .msg { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Cadastro</h2>
+    <input type="text" id="name" placeholder="Nome">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Senha">
+    <button onclick="registrar()">Registrar</button>
+    <div class="msg" id="mensagem"></div>
+  </div>
+
+  <script>
+    function registrar() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      fetch('http://localhost:5001/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "name": name, "email": email, "password": password })
+      })
+      .then(res => res.json().then(data => ({ status: res.status, data })))
+      .then(result => {
+        document.getElementById('mensagem').textContent = result.data.mensagem;
+        if (result.status === 201) {
+          document.getElementById('mensagem').style.color = 'green';
+          setTimeout(function() {
+            window.location.href = "/login"
+          }, 1000);
+          
+        } else {
+          document.getElementById('mensagem').style.color = 'red';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

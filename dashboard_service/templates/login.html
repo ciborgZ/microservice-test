@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body { font-family: Arial; background: #eef1f5; padding: 40px; }
+    .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; }
+    .msg { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Senha">
+    <button onclick="logar()">Entrar</button>
+    <div class="msg" id="mensagem"></div>
+  </div>
+
+  <script>
+function logar() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('password').value;
+
+      fetch('http://localhost:5002/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "email": email, "password": senha })
+      })
+      .then(res => res.json().then(data => ({ status: res.status, data })))
+      .then(result => {
+        if (result.status === 200 && result.data.token) {
+          document.getElementById('mensagem').textContent = 'Login realizado com sucesso!';
+          document.getElementById('mensagem').style.color = 'green';
+          localStorage.setItem('token', result.data.token); // Salva o token no localStorage
+
+          // Realiza uma requisição para a rota /dashboard passando o token no header
+          fetch('/dashboard', {
+            method: 'GET',
+            headers: {
+              'Authorization': `${localStorage.getItem('token')}` // Envia o token no cabeçalho
+            }
+          })
+          .then(response => response.text())  // Obtém a resposta como texto
+          .then(data => {
+            // Exibe a resposta da rota /dashboard
+            document.body.innerHTML = data;  // Substitui o conteúdo da página
+          })
+          .catch(error => {
+            console.error('Erro ao acessar o dashboard:', error);
+          });
+        } else {
+          document.getElementById('mensagem').textContent = result.data.mensagem;
+          document.getElementById('mensagem').style.color = 'red';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
